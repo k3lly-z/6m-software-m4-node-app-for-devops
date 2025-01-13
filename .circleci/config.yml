@@ -26,6 +26,18 @@ jobs:
       - run: |
           echo "Running tests"
           npm run test
+  build-and-push:
+    docker:
+      - image: cimg/node:16.10
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Build Docker Image
+          command: docker build -t k3llyz/container-assignment .
+      - run:
+          name: Push Docker Image
+          command: docker push k3llyz/container-assignment
   deploy:
     docker:
       - image: cimg/node:16.10
@@ -50,6 +62,9 @@ workflows:
       - test:
           requires: 
             - build
+      - build-and-push:
+          requires:
+            - test
       - deploy:
           requires:
             - test
