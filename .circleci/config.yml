@@ -32,12 +32,13 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker
+
       - run:
           name: Build Docker Image
-          command: docker build -t k3llyz/container-assignment .
+          command: docker build -t k3llyz/container-assignment:latest .
       - run:
           name: Push Docker Image
-          command: docker push k3llyz/container-assignment
+          command: docker push k3llyz/container-assignment:latest
   deploy:
     docker:
       - image: cimg/node:16.10
