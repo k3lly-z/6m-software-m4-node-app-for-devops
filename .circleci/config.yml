@@ -58,12 +58,39 @@ jobs:
 
 
 
+# workflows:
+#   simple_workflow:
+#     jobs:
+#       - build
+#       - test:
+#           requires: 
+#             - build
+#       - build-and-push:
+#           requires:
+#             - test
+#       - deploy:
+#           requires:
+#             - test
+
+
 workflows:
-  simple_workflow:
+  version: 2
+  main_branch_workflow:
+    when:
+      equal: [main, << pipeline.git_branch >>]
     jobs:
       - build
       - test:
-          requires: 
+          requires:
+            - build
+
+  release_branch_workflow:
+    when:
+      equal: [release, << pipeline.git_branch >>]
+    jobs:
+      - build
+      - test:
+          requires:
             - build
       - build-and-push:
           requires:
