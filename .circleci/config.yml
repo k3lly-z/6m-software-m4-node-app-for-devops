@@ -55,15 +55,54 @@ jobs:
             heroku stack:set container -a keer-su-devops
             heroku container:push web -a keer-su-devops
             heroku container:release web -a keer-su-devops
+  scan:
+    docker: 
+      - image: cimg/node:16.10
+    environment:
+      IMAGE_NAME: k3llyz/container-assignment
+    steps:
+      - checkout
+      - setup_remote_docker
+      - docker/check
+      - run: docker build -t $IMAGE_NAME .
+      - snyk/scan: 
+          docker-image-name: $IMAGE_NAME
 
+
+
+workflows:
+  simple_workflow:
+    jobs:
+      - build
+      # - deploy:
+      #     requires:
+      #       - test
+      - scan:
+          requires:
+            - build
+      - test:
+          requires: 
+            - scan
 
 
 # workflows:
-#   simple_workflow:
+#   version: 2
+#   main_branch_workflow:
+#     when:
+#       equal: [main, << pipeline.git_branch >>]
 #     jobs:
 #       - build
 #       - test:
-#           requires: 
+#           requires:
+#             - build
+
+#   release_branch_workflow:
+#     when:
+#       equal: [release, << pipeline.git_branch >>]
+#     jobs:
+#       - build
+#       - test:
+#           requires:
 #             - build
 #       - build-and-push:
 #           requires:
@@ -71,30 +110,3 @@ jobs:
 #       - deploy:
 #           requires:
 #             - test
-
-
-workflows:
-  version: 2
-  main_branch_workflow:
-    when:
-      equal: [main, << pipeline.git_branch >>]
-    jobs:
-      - build
-      - test:
-          requires:
-            - build
-
-  release_branch_workflow:
-    when:
-      equal: [release, << pipeline.git_branch >>]
-    jobs:
-      - build
-      - test:
-          requires:
-            - build
-      - build-and-push:
-          requires:
-            - test
-      - deploy:
-          requires:
-            - test
